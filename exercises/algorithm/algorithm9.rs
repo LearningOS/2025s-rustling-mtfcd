@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +22,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![],
             comparator,
         }
     }
@@ -37,11 +36,21 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        let mut cur = self.count - 1;
+        while cur > 0 {
+            let parent_idx = self.parent_idx(cur);
+            if (self.comparator)(&self.items[parent_idx], &self.items[cur]) {
+                break;
+            }
+            self.items.swap(cur, parent_idx);
+            cur = parent_idx
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
-        idx / 2
+        (idx - 1) / 2
     }
 
     fn children_present(&self, idx: usize) -> bool {
@@ -49,7 +58,7 @@ where
     }
 
     fn left_child_idx(&self, idx: usize) -> usize {
-        idx * 2
+        idx * 2 + 1
     }
 
     fn right_child_idx(&self, idx: usize) -> usize {
@@ -58,7 +67,7 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        0
     }
 }
 
@@ -84,8 +93,30 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        self.count -= 1;
+        self.items.swap(0, self.count);
+        let mut cur = 0;
+        while cur < self.count {
+            let left = self.left_child_idx(cur);
+            let right = self.right_child_idx(cur);
+            let mut temp_cur = cur;
+            if left < self.count && (self.comparator)(&self.items[left], &self.items[temp_cur]) {
+                temp_cur = left;
+            }
+            if right < self.count && (self.comparator)(&self.items[right], &self.items[temp_cur]) {
+                temp_cur = right;
+            }
+            if temp_cur == cur {
+                break;
+            }
+            self.items.swap(cur, temp_cur);
+            cur = temp_cur;
+        }
+
+        self.items.pop()
     }
 }
 
@@ -152,3 +183,4 @@ mod tests {
         assert_eq!(heap.next(), Some(2));
     }
 }
+
